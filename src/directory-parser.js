@@ -6,11 +6,7 @@ function checkIsExcludeDir(dir, excludeDir){
   for(const exclude of excludeDir){
     if(isExclude) break;
     if (typeof exclude === "function") {
-      
-      const c= exclude(dir)
- 
       isExclude = exclude(dir) 
-      
     }else{
       isExclude = exclude == dir
     }
@@ -20,8 +16,10 @@ function checkIsExcludeDir(dir, excludeDir){
 function parsePagesDirectory(
   dir,
   excludeDir,
+  home,
   { prependName, prependPath } = { prependName: '', prependPath: '/' },
 ) { 
+  const _home = home || "/" 
   let routes = []
 
   const siblings = fs.readdirSync(dir, { withFileTypes: true })
@@ -38,17 +36,17 @@ function parsePagesDirectory(
     if(checkIsExcludeDir(path.join(dir, f.name),excludeDir)) break
 
     const routeOptions = []
-    // Route name
+    // Route name 
     if (!directories.includes(f.name) || !fs.existsSync(path.join(dir, f.name, 'index.vue'))) {
       const routeName =
-        f.name === 'index' && prependName
+        f.name.toLowerCase() === 'index' && prependName
           ? prependName.slice(0, -1)
           : prependName + f.name.replace(/^_/, '')
       routeOptions.push(`name: '${routeName}'`)
-    }
-    // Route path
+    } 
+    // Route path 
     routeOptions.push(
-      `path: '${prependPath}${f.name === 'index' ? '' : f.name.replace(/^_/, ':')}'`,
+      `path: '${prependPath}${f.name.toLowerCase() === 'index' ? '' : prependPath+f.name == _home ? '/' : f.name.replace(/^_/, ':')}'`,
     )
     // Route component
     routeOptions.push(`component: () => import('/${f.importPath}')`)
@@ -56,7 +54,7 @@ function parsePagesDirectory(
     if (directories.includes(f.name)) {
      
       
-      children = parsePagesDirectory(path.join(dir, f.name),excludeDir, {
+      children = parsePagesDirectory(path.join(dir, f.name),excludeDir, _home, {
         prependName: `${prependName}${f.name.replace(/^_/, '')}-`,
         prependPath: '',
       }).routes
@@ -72,7 +70,7 @@ function parsePagesDirectory(
   for (const name of remainingDirectories) {
 
     if(checkIsExcludeDir(path.join(dir, name),excludeDir)) break
-    const parsedDir = parsePagesDirectory(path.join(dir, name),excludeDir, {
+    const parsedDir = parsePagesDirectory(path.join(dir, name),excludeDir,_home, {
       prependName: `${prependName}${name.replace(/^_/, '')}-`,
       prependPath: `${prependPath}${name.replace(/^_/, ':')}/`,
     })

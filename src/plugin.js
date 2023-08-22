@@ -4,12 +4,12 @@ const { parsePagesDirectory } = require('./directory-parser')
 const virtualModuleId = 'vue-auto-route'
 const resolvedVirtualModuleId = '\0' + virtualModuleId
 
-function makeModuleContent({ pagesDir,excludeDirs }) {
-  const { routes } = parsePagesDirectory(pagesDir,excludeDirs)
+function makeModuleContent({ pagesDir,excludeDirs,home="/" }) {
+  const { routes } = parsePagesDirectory(pagesDir,excludeDirs,home)
   return `export const routes = [${routes.join(', \n')}]`
 }
  
-module.exports = function ({ pagesDir,excludeDirs } = { pagesDir: 'src/pages/', excludeDirs:[] }) {
+module.exports = function ({ pagesDir,excludeDirs,home } = { pagesDir: 'src/pages/', excludeDirs:[],  homme:"/"}) {
  
   
  
@@ -33,10 +33,10 @@ module.exports = function ({ pagesDir,excludeDirs } = { pagesDir: 'src/pages/', 
     },
     load(id) {
       if (id === resolvedVirtualModuleId) {
-        return makeModuleContent({ pagesDir,excludeDirs })
+        return makeModuleContent({ pagesDir,excludeDirs,home })
       }
     },
     
-    plugins: [virtual({ 'vue-auto-routes': makeModuleContent({ pagesDir,excludeDirs }) })],
+    plugins: [virtual({ 'vue-auto-routes': makeModuleContent({ pagesDir,excludeDirs,home }) })],
     vueCustomBlockTransforms }
 }
