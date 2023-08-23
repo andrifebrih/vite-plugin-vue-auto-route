@@ -48,8 +48,9 @@ function parsePagesDirectory(
     routeOptions.push(
       `path: '${prependPath}${f.name.toLowerCase() === 'index' ? '' : prependPath+f.name == _home ? '/' : f.name.replace(/^_/, ':')}'`,
     )
-    // Route component
-    routeOptions.push(`component: () => import('/${f.importPath}')`)
+    // Route component 
+ 
+    routeOptions.push(`component: () => import('/${f.importPath.replace(/\\/g, "/")}')`)
     // Route children
     if (directories.includes(f.name)) {
      
